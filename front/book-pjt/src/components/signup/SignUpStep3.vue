@@ -72,17 +72,53 @@ watch(() => props.form.preferred_categories, fetchBooksByCategories, { immediate
 </script>
 
 <style scoped>
-p {
-  text-align: center;
-}
 .card {
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
 }
+
 .card.border-primary {
-  border: 2px solid #f36faa;
-  background-color: #eec1d6;
-  color: #ee5f9f;
-  font-weight: bold;
+  border: 2px solid #fc47b0;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card-img-top {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 0.8rem;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;         /* 제목 2줄 제한 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  min-height: 2.8em;             /* 높이 고정 */
+}
+
+.card-text {
+  font-size: 0.7rem;
+  color: #555;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;         /* 저자명 1줄 제한 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
+

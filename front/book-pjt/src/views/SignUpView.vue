@@ -101,7 +101,8 @@ const prevStep = () => {
 
 <style scoped>
 .panel {
-  width: 480px;
+  width: 580px;
+  height: 500px inherit;
   margin: 60px auto;
   background: #ffffff;
   border-radius: 20px;
@@ -155,6 +156,7 @@ h1.animate1 {
 .progress-bar {
   display: flex;
   justify-content: center;
+  flex-direction: row;
   align-items: center;
   gap: 12px;
   animation: fadeIn 0.5s ease-in-out;

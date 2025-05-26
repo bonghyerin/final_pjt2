@@ -68,6 +68,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+p {
+  text-align: center;
+}
 .card {
   border: 1px solid #ccc;
   border-radius: 12px;
