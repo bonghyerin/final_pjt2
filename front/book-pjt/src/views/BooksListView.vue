@@ -258,6 +258,7 @@ async function toggleBookmark(bookId) {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  align-items: flex-start;
 }
 
 /* 카드: 내용 */
