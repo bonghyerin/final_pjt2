@@ -1,8 +1,14 @@
 <template>
   <div class="book-list-container">
     <section class="recommendations">
-      <h1 class="banner-title">BOOK</h1>
-      <h2 class="banner-subtitle">CATALOG</h2>
+      <div class="banner-images">
+        <img
+          src="/img/bookcat.png"
+          alt="Book Catalog"
+          class="banner-image"
+        />
+        
+      </div>
     </section>
     <p class="subtitle">마음에 드는 책을 북마크 해보세요!</p>
 
@@ -23,31 +29,33 @@
 
     <div class="book-grid">
       <div class="book-card" v-for="book in paginatedBooks" :key="book.id">
-        <div class="book-card-inner">
-          <img :src="book.cover" :alt="book.title" class="book-cover" />
-          <div class="book-info">
-            <div class="title-wrap">
-              <h3 class="book-title clamp">{{ book.title }}</h3>
-              <label class="heart-label">
-                <input type="checkbox" v-model="book.isBookmarked" class="heart-checkbox">
-                <svg class="icon" viewBox="0 0 1024 1024">
-                  <path class="heart-path"
-                    d="M742.4 101.12A249.6 249.6 0 0 0 512 256a249.6
-                    249.6 0 0 0-230.72-154.88C143.68
-                    101.12 32 238.4 32 376.32c0
-                    301.44 416 546.56 480 546.56s480-245.12
-                    480-546.56c0-137.92-111.68-275.2-249.6-275.2z" />
-                </svg>
-                <span class="burst"></span>
-              </label>
-            </div>
-            <p class="book-author">{{ book.author }}</p>
-            <p class="book-publisher">{{ book.publisher }}</p>
-            <p class="book-date">출판일 | {{ formattedDate(book.pub_date) }}</p>
-            <p class="book-description">{{ book.description }}</p>
-          </div>
+  <div class="card-inner-box">
+    <div class="book-card-inner">
+      <img :src="book.cover" :alt="book.title" class="book-cover" />
+      <div class="book-info">
+        <div class="title-wrap">
+          <h3 class="book-title clamp">{{ book.title }}</h3>
+          <label class="heart-label">
+            <input type="checkbox" :checked="isLiked(book.id)" @change="toggleBookmark(book.id)" class="heart-checkbox">
+            <svg class="icon" viewBox="0 0 1024 1024">
+              <path class="heart-path"
+                d="M742.4 101.12A249.6 249.6 0 0 0 512 256a249.6
+                249.6 0 0 0-230.72-154.88C143.68
+                101.12 32 238.4 32 376.32c0
+                301.44 416 546.56 480 546.56s480-245.12
+                480-546.56c0-137.92-111.68-275.2-249.6-275.2z" />
+            </svg>
+            <span class="burst"></span>
+          </label>
         </div>
+        <p class="book-author">{{ book.author }}</p>
+        <p class="book-publisher">{{ book.publisher }}</p>
+        <p class="book-date">출판일 | {{ formattedDate(book.pub_date) }}</p>
+        <p class="book-description">{{ book.description }}</p>
       </div>
+    </div>
+  </div>
+</div>
     </div>
 
     <!-- 페이지네이션 -->
@@ -63,17 +71,24 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
+import { useAccountStore } from '@/stores/accounts.js'
 
+const store = useAccountStore()
 const books = ref([])
 const activeGenre = ref('전체')
 const route = useRoute()
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-onMounted(() => {
+const likedBookIds = ref([])
+
+onMounted(async () => {
+  await store.fetchUserProfile()
+  likedBookIds.value = store.user?.preferred_books || []
+
   axios.get('http://127.0.0.1:8000/api/v1/books/')
     .then(res => {
-      books.value = res.data.map(book => ({ ...book, isBookmarked: false }))
+      books.value = res.data
     })
     .catch(err => {
       console.error('책 불러오기 실패:', err)
@@ -120,61 +135,68 @@ watch(
 function formattedDate(dateString) {
   return new Date(dateString).toLocaleDateString('ko-KR')
 }
+
+function isLiked(bookId) {
+  return likedBookIds.value.includes(bookId)
+}
+
+async function toggleBookmark(bookId) {
+  const current = [...likedBookIds.value]
+  const index = current.indexOf(bookId)
+  if (index === -1) {
+    current.push(bookId)
+  } else {
+    current.splice(index, 1)
+  }
+  likedBookIds.value = current
+
+  try {
+    await axios.patch('http://127.0.0.1:8000/accounts/profile/', {
+      preferred_books: current
+    }, {
+      headers: { Authorization: `Token ${store.token}` }
+    })
+
+    await store.fetchUserProfile()
+  } catch (err) {
+    console.error('북마크 저장 실패:', err)
+  }
+}
 </script>
 
-<style scoped>
 
-.book-title.clamp {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.book-card,
-.book-info,
-.title-wrap {
-  overflow: visible;
-}
-.recommendations {
-  text-align: center;
-  padding: 3rem 1rem 3rem;
-  background-color: none;
-}
-.banner-title {
-  font-size: 6rem;
-  font-weight: 900;
-  text-align: center;
-  letter-spacing: -0.05em;
-  margin-bottom: 0;
-}
-.banner-subtitle {
-  font-size: 3rem;
-  font-weight: 300;
-  text-align: center;
-  margin-top: -0.5rem;
-  color: #333;
-}
+<style scoped>
 .book-list-container {
-  max-width: 100%;
-  padding: 0;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 0 1rem;
   background: #fff;
-  font-family: 'Pretendard Variable', sans-serif;
+  font-family: 'AritaM', sans-serif;
 }
-.title {
-  font-size: 2rem;
-  text-align: center;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+
+/* 배너 */
+.recommendations {
+  display: flex;
+  align-items: center;
+  height: 50vh;
+  padding: 3rem 1rem;
 }
-.title-wrap {
-  position: relative;
-  padding-right: 36px; /* 하트 공간 확보 */
-  overflow: visible;
+.banner-images {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0rem;
+  padding: 3rem 1rem;
 }
+.banner-image {
+  max-width: 40%;
+  display: block;
+}
+
+/* 카테고리 */
 .subtitle {
-  text-align: center;
+  padding-left: 100px;
+  text-align: left;
   color: #888;
   margin-bottom: 2rem;
 }
@@ -184,6 +206,8 @@ function formattedDate(dateString) {
   gap: 0.5rem;
   justify-content: center;
   margin-bottom: 2rem;
+  padding-top: 50px;
+  padding-bottom: 20px;
 }
 .category-tab {
   border: 1px solid #303331;
@@ -200,28 +224,104 @@ function formattedDate(dateString) {
   background: #4ef748;
   color: #fff;
 }
+
+/* 책 리스트 */
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 한 줄에 2개 고정 */
-  border-top: 1px solid #ddd;
-  border-left: 1px solid #ddd;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  align-items: stretch;
 }
+
+/* 카드: 외부 */
 .book-card {
-  border-right: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-  padding: 2rem;
-  background-color: #fff;
+  background-color: #b1f18c79;
+  padding: 1.5rem;
+  border-radius: 1rem;
   transition: transform 0.2s ease;
-  border-radius: 0;
+  display: flex;
+  height: 260px;
+  overflow: hidden;
 }
+.book-card:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+/* 카드: 내부 둥근 상자 */
+.card-inner-box {
+  background-color: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 카드: 내용 */
 .book-card-inner {
   display: flex;
   flex-direction: row;
   gap: 1.5rem;
+  align-items: flex-start;
+  height: 100%;
+  overflow: hidden;
 }
-.book-card:hover {
-   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+.book-cover {
+  width: 180px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.2rem;
+  flex-shrink: 0;
+  cursor: pointer;
 }
+.book-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+  overflow: hidden;
+}
+.title-wrap {
+  position: relative;
+  padding-right: 36px;
+  overflow: visible;
+}
+.book-title {
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  line-height: 1.4;
+}
+.book-title.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.book-author,
+.book-publisher,
+.book-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+.book-description {
+  font-size: 0.85rem;
+  color: #444;
+  line-height: 1.4;
+  margin-top: 0.3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 하트 */
 .heart-label {
   position: absolute;
   top: 0;
@@ -229,8 +329,7 @@ function formattedDate(dateString) {
   width: 24px;
   height: 24px;
   cursor: pointer;
-    z-index: 10; /* 꼭 지정! */
-      overflow: visible;
+  z-index: 10;
 }
 .heart-checkbox {
   display: none;
@@ -239,7 +338,6 @@ svg.icon {
   width: 24px;
   height: 24px;
   overflow: visible;
-  animation: none;
 }
 .heart-path {
   fill: transparent;
@@ -280,6 +378,8 @@ svg.icon {
   animation: blink 0.6s ease-in-out forwards;
   animation-delay: 0.5s;
 }
+
+/* 하트 애니메이션 */
 @keyframes drawHeart {
   0% { stroke-dashoffset: 300; fill: #eee; }
   80% { stroke-dashoffset: 0; fill: #eee; }
@@ -295,52 +395,6 @@ svg.icon {
   80% { transform: translate(-50%,-50%) scale(1); opacity:1; }
   100% { transform: translate(-50%,-50%) scale(1.1); opacity:0; }
 }
-.book-card-inner {
-  display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
-}
-.book-cover {
-  width: 180px;
-  height: auto;
-  object-fit: contain;
-  border-radius: 0.2rem;
-  flex-shrink: 0;
-cursor: pointer;
-}
-.book-info {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  position: relative;
-}
-.book-title {
-cursor: pointer;
-
-  font-size: 1.1rem;
-  font-weight: bold;
-  line-height: 1.4;
-}
-.book-author,
-.book-publisher,
-.book-date {
-  font-size: 0.9rem;
-  color: #666;
-}
-.book-description {
-  font-size: 0.9rem;
-  color: #444;
-  line-height: 1.5;
-  margin-top: 0.5rem;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 3; /* 최대 3줄까지만 보여줘 */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 
 /* 페이지네이션 */
 .pagination {
@@ -350,7 +404,6 @@ cursor: pointer;
   margin: 2rem 0;
   gap: 1rem;
 }
-
 .pagination button {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
@@ -360,16 +413,13 @@ cursor: pointer;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-
 .pagination button:hover:enabled {
   background-color: #e0e0e0;
 }
-
 .pagination button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
-
 .pagination span {
   font-size: 0.95rem;
   color: #555;

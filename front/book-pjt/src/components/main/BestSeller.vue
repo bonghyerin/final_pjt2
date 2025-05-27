@@ -1,6 +1,6 @@
 <template>
+  <h2 class="section-title">베스트셀러</h2>
   <div class="bestseller-section">
-    <h2 class="section-title">📚 베스트셀러</h2>
 
     <div class="category-tabs">
       <button
@@ -61,32 +61,41 @@ onMounted(() => {
 })
 </script>
 
+
+
 <style scoped>
 .bestseller-section {
-  max-width: 1200px;
+  width: 100%;
+  
   margin: 0 auto;
   padding: 2rem 1rem;
+  background-color: #f8f9fb; /* 은은한 배경색 */
+  border-radius: 16px;
 }
 
 .section-title {
-  font-size: 1.6rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 1.2rem;
+  margin-left: 30px;
+  color: #333;
 }
 
+/* 카테고리 탭 버튼 */
 .category-tabs {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
 }
 
 .category-tabs button {
-  padding: 0.4rem 1rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
   border: 1px solid #ccc;
-  border-radius: 9999px;
+  border-radius: 999px;
   background: white;
   cursor: pointer;
   transition: all 0.3s;
@@ -94,11 +103,12 @@ onMounted(() => {
 
 .category-tabs button.active,
 .category-tabs button:hover {
-  background-color: #fc47b0;
+  background-color: #4ef748;
   color: white;
   font-weight: bold;
 }
 
+/* 슬라이더 구조 */
 .slider-wrapper {
   display: flex;
   align-items: center;
@@ -106,41 +116,43 @@ onMounted(() => {
   overflow: hidden;
 }
 
+/* 카드 슬라이더 내부 */
 .book-slider {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.2rem;
   overflow-x: auto;
   scroll-behavior: smooth;
-  padding: 0 1rem;
+  padding: 0 5rem 3rem 5rem;
 }
 
+/* 각 책 카드 스타일 */
 .book-card {
-  min-width: 180px;
-  max-width: 180px;
+  min-width: 150px;
+  max-width: 150px;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 0.8rem;
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   flex-shrink: 0;
 }
 
 .book-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
 .book-cover {
   width: 100%;
-  height: auto;
-  object-fit: contain;
-  border-radius: 10px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .book-title {
-  margin-top: 0.8rem;
-  font-size: 0.95rem;
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
   color: #333;
   font-weight: 500;
   display: -webkit-box;
@@ -150,13 +162,14 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 
+/* 슬라이드 버튼 */
 .slide-btn {
   background: white;
   border: 1px solid #ccc;
   border-radius: 50%;
-  font-size: 1.5rem;
-  width: 36px;
-  height: 36px;
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -165,14 +178,14 @@ onMounted(() => {
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .slide-btn.left {
-  left: 0.5rem;
+  left: 0.3rem;
 }
 
 .slide-btn.right {
-  right: 0.5rem;
+  right: 0.3rem;
 }
 </style>
